@@ -36,10 +36,10 @@ Give option to search by player name or by player ID
 Also, async to allow for multipler users to use the api (i think that's how that works)
 """
 
-
-# @app.get("/player/{player_name}")
-# async def read_item(player_name: str):
-#     return {"item_name": player_name}
+@app.get("/player/{player_name}", status_code=status.HTTP_200_OK)
+@limiter.limit(limiter_amount)
+async def read_item(player_name: str, response: Response, request: Request):
+    return GetPlayers.get_player_by_name(player_name)
 
 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)

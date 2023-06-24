@@ -65,7 +65,7 @@ class GetPlayers:
         Here, we can reiterate until we find the player name. Although,
         this will literally take forvere
         """
-        return ("test")
+        return {"Test name": player_name}
 
 # testing 
 # html = get_html(9)  

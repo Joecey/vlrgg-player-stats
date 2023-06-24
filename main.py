@@ -1,7 +1,15 @@
 # main FastAPI app
 from api.players import GetPlayers
 
-from fastapi import FastAPI, status, Response
+from fastapi import FastAPI, status, Response, Request
+
+# Limit the amount of requests using slowapi so vercel doesn't blow up
+# also saw thi in axsddlr's solution, so i decided to use it too
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="vlr.gg player API",
@@ -10,13 +18,18 @@ app = FastAPI(
     version="1.0.0",
     
     # set the docs url to be the root URL 
-    docs_url="/",
+    docs_url='/',
     redoc_url=None,
 )
 
-@app.get("/", status_code=status.HTTP_200_OK)
-def read_root():
-    return {"Service running": True }
+# set limit rate for API
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+limiter_amount = "200/minute"
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+def service_health():
+    return {"Service running": True}
 
 """
 Give option to search by player name or by player ID
@@ -30,7 +43,8 @@ Also, async to allow for multipler users to use the api (i think that's how that
 
 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)
-async def read_item(player_id: int, response: Response):
+@limiter.limit(limiter_amount)
+async def read_item(player_id: int, response: Response, request: Request):
     try:
         player_obj = GetPlayers.get_player_by_id(player_id)
         return player_obj

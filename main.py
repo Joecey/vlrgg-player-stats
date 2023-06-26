@@ -8,6 +8,7 @@ from fastapi import FastAPI, status, Response, Request
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+import asyncio
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -38,13 +39,19 @@ Also, async to allow for multipler users to use the api (i think that's how that
 
 @app.get("/player/{player_name}", status_code=status.HTTP_200_OK)
 @limiter.limit(limiter_amount)
-async def read_item(player_name: str, response: Response, request: Request):
-    return GetPlayers.get_player_by_name(player_name)
+async def getPlayerByName(player_name: str, response: Response, request: Request):
+    try:
+        player_obj = await asyncio.run(GetPlayers.get_player_by_name(player_name))
+        return player_obj
+    
+    except Exception as e:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return "Bad request. Note: this is a very experimental preview feature!"
 
 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)
 @limiter.limit(limiter_amount)
-async def read_item(player_id: int, response: Response, request: Request):
+async def getPlayerByID(player_id: int, response: Response, request: Request):
     try:
         player_obj = GetPlayers.get_player_by_id(player_id)
         return player_obj

@@ -2,7 +2,7 @@
 Get details of player by either specifying team ID or brute forcing name search
 TODO Also give option to list all players?
 """
-
+import asyncio
 import httpx 
 from selectolax.parser import HTMLParser
 
@@ -21,7 +21,7 @@ class Player:
 
 def get_html(player_id):
         url = "https://www.vlr.gg/player/{}".format(player_id)
-        resp = httpx.get(url)
+        resp = httpx.get(url, timeout=None)
         return HTMLParser(resp.text)
 
 def parse_player_id(html, id):
@@ -55,21 +55,49 @@ def remove_last(text):
     final = text[:-1]
     return final
 
+async def async_search_player(player_name):
+    async with httpx.AsyncClient(timeout=None) as client:
+        tasks = [client.get(f"https://www.vlr.gg/player/{i}")
+                    for i in range(0, 10)]
+        r = await asyncio.gather(*tasks)
+        
+        for resp_num in range(len(r)):
+            title = remove_esc_seq(HTMLParser(r[resp_num].text).css_first("title").text())
+            title_temp = title.lower()
+            name_temp = player_name.lower()
+            
+    
+            if name_temp in title_temp:
+                return resp_num
+        
+        return ("Player not found")
+
+            
+    
 class GetPlayers:
     def get_player_by_id(player_id): 
         html = get_html(player_id)
         return(parse_player_id(html, player_id))
     
+    # !Warning - this will take too long if you use it
+    # TODO: How do we make this faster?????
     def get_player_by_name(player_name):
         """
         Here, we can reiterate until we find the player name. Although,
-        this will literally take forvere
+        I question the performance of this, but lets try it anyways. Actually, we can
+        probably check the page Title > could be quicker?
         """
-        return {"Test name": player_name}
+        # player_max = 40000
+        correct_id = asyncio.run(async_search_player(player_name))
+        
+        if type(correct_id) == int:
+            html = get_html(correct_id)
+            return(parse_player_id(html, correct_id))
+        else:
+            return("Player name out of bounds for Preview")
 
 # testing 
-# html = get_html(9)  
-# print(parse_player_id(html, 9))
+# print(GetPlayers.get_player_by_name("Sacy"))
 
     
 

@@ -24,6 +24,11 @@ def get_html(player_id):
         resp = httpx.get(url)
         return HTMLParser(resp.text)
 
+#TODO add top 5 recent matches > maybe use matches url
+#TODO add past teams
+#TODO add 3 most recent news articles on player?
+#TODO add total winnings
+
 def parse_player_id(html, id):
         new_player = Player(
             index = id,

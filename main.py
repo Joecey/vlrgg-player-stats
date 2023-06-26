@@ -1,6 +1,6 @@
 # main FastAPI app
 from api.players import GetPlayers
-
+from api.teams import GetTeams
 from fastapi import FastAPI, status, Response, Request
 
 # Limit the amount of requests using slowapi so vercel doesn't blow up
@@ -36,15 +36,25 @@ Give option to search by player name or by player ID
 Also, async to allow for multipler users to use the api (i think that's how that works)
 """
 
-@app.get("/player/{player_name}", status_code=status.HTTP_200_OK)
+# @app.get("/player/{player_name}", status_code=status.HTTP_200_OK)
+# @limiter.limit(limiter_amount)
+# async def read_item(player_name: str, response: Response, request: Request):
+#     return GetPlayers.get_player_by_name(player_name)
+
+@app.get("/teamID/{team_id}", status_code=status.HTTP_200_OK)
 @limiter.limit(limiter_amount)
-async def read_item(player_name: str, response: Response, request: Request):
-    return GetPlayers.get_player_by_name(player_name)
+async def get_team_by_id(team_id: int, response: Response, request: Request):
+    try:
+        player_obj = GetTeams.get_team_by_id(team_id)
+        return player_obj
+    except Exception as e:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return "Not a valid player ID"
 
 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)
 @limiter.limit(limiter_amount)
-async def read_item(player_id: int, response: Response, request: Request):
+async def get_player_by_id(player_id: int, response: Response, request: Request):
     try:
         player_obj = GetPlayers.get_player_by_id(player_id)
         return player_obj

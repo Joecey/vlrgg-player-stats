@@ -8,6 +8,7 @@ from fastapi import FastAPI, status, Response, Request
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+import os
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -29,7 +30,7 @@ limiter_amount = "200/minute"
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 def service_health():
-    return {"Service running": True}
+    return {"Service running {}".format(os.environ.get('PORT')): True}
 
 """
 Give option to search by player name or by player ID

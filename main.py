@@ -30,7 +30,7 @@ limiter_amount = "200/minute"
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 def service_health():
-    return {"Service running {}".format(os.environ.get('PORT')): True}
+    return {"Service running": True}
 
 """
 Give option to search by player name or by player ID

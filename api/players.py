@@ -14,9 +14,6 @@ from api.helper import HelperFunctions as hl
 import pyrebase 
 import os 
 
-# from dotenv import load_dotenv
-# load_dotenv()
-
 
 config = {
     "apiKey": os.environ.get('API_KEY'),
@@ -27,9 +24,9 @@ config = {
 }
 # setup config and login with client credentials
 firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
-client = auth.sign_in_with_email_and_password(os.environ.get('CLIENT_EMAIL'), os.environ.get('CLIENT_PASSWORD'))
-db = firebase.database()
+# auth = firebase.auth()
+# client = auth.sign_in_with_email_and_password(os.environ.get('CLIENT_EMAIL'), os.environ.get('CLIENT_PASSWORD'))
+# db = firebase.database()
 
 @dataclass
 class Player:

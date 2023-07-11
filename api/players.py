@@ -14,8 +14,8 @@ from api.helper import HelperFunctions as hl
 import pyrebase 
 import os 
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 
 config = {

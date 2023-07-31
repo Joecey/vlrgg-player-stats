@@ -11,24 +11,7 @@ from dataclasses import dataclass, asdict
 from api.helper import HelperFunctions as hl
 
 # Firebase setup
-import pyrebase 
 import os 
-
-from dotenv import load_dotenv
-load_dotenv()
-
-config = {
-    "apiKey": os.environ.get('API_KEY'),
-    "authDomain": os.environ.get('AUTH_DOMAIN'),
-    "databaseURL": os.environ.get('DATABASE_URL'),
-    "storageBucket": os.environ.get('STORAGE_BUCKET'),
-
-}
-# setup config and login with client credentials
-firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
-client = auth.sign_in_with_email_and_password(os.environ.get('CLIENT_EMAIL'), os.environ.get('CLIENT_PASSWORD'))
-db = firebase.database()
 
 @dataclass
 class Player:
@@ -77,15 +60,17 @@ def parse_player_id(html, id):
 def parse_player_name(ign : str):
     # first check firebase storage for previously saved players
     # doing this means request will be processed faster
-    cloud_players = db.child("players").get()
-    if (ign.lower()) in cloud_players.val():
+    cloud_players = False
+    if cloud_players is True:
         print("Player found in Firebase...")
-        url_substring = db.child("players").child(ign.lower()).get().val()
+        
+        # TODO: 31/7/23 temp placeholder, replace with pocketbase lookup
+        url_substring = '/player/9/tenz'
         return url_substring
 
     # get all players from stats page (this may take some time)
     else:
-        print("player not found in local storage. adding to firebase - this may take some time...")
+        print("player not found in local storage. adding to database - this may take some time...")
         player_stats_url = "https://www.vlr.gg/stats/?event_group_id=all&event_id=all&region=all&country=all&min_rounds=200&min_rating=1550&agent=all&map_id=all&timespan=all"
         resp = httpx.get(player_stats_url, timeout=None)
         raw_html = HTMLParser(resp.text)
@@ -105,10 +90,14 @@ def parse_player_name(ign : str):
             if ign.lower() == player_name:
                 print("Player found!")
                 
-                # Add to Firebase for faster future reference
+                # TODO: 31/7/23 add to pocketbase database
                 data = {player_name: a_div.attributes['href']}
-                db.child("players").update(data, client.get('idToken'))
-                return data
+
+                # data represents player name and substring url e.g /player/9/tenz
+                url = "https://www.vlr.gg{}".format(data[player_name])
+                print(url)
+                resp = httpx.get(url)
+                return(parse_player_id(HTMLParser(resp.text), data[player_name].split('/')[2]))
         
         return "Player not found."
 

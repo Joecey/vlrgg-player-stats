@@ -71,12 +71,17 @@ def parse_player_name(ign : str):
     # get all players from stats page (this may take some time)
     else:
         print("player not found in local storage. adding to database - this may take some time...")
-        player_stats_url = "https://www.vlr.gg/stats/?event_group_id=all&event_id=all&region=all&country=all&min_rounds=200&min_rating=1550&agent=all&map_id=all&timespan=all"
+        # ! NOTE: This includes only players with more than 200 rounds played
+        # player_stats_url = "https://www.vlr.gg/stats/?event_group_id=all&event_id=all&region=all&country=all&min_rounds=200&min_rating=1550&agent=all&map_id=all&timespan=all"
+        
+        #! in vercel hobby plan, timeout max out after 5 seconds > might need upgrade?
+        #! or just have a giant databse in pocketbase already
+        player_stats_url = "https://www.vlr.gg/stats/?event_group_id=all&event_id=all&region=all&country=all&min_rounds=200&min_rating=1550&agent=all&map_id=all&timespan=90d"
         resp = httpx.get(player_stats_url, timeout=None)
         raw_html = HTMLParser(resp.text)
         
         # find all players from raw html
-        # ! NOTE: This includes only players with more than 200 rounds played
+        
         all_players = raw_html.css("td.mod-player")
         
         for i in range(len(all_players)):

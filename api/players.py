@@ -15,12 +15,12 @@ from api.helper import HelperFunctions as hl
 import os 
 
 # dotenv for testing locally only
-# from dotenv import load_dotenv
-# load_dotenv()
-pb_url = os.getenv('PB_DOMAIN')
+from dotenv import load_dotenv
+load_dotenv()
+pb_url = os.environ.get('PB_DOMAIN')
 #! email isn't getting pulled into os.getenv
-admin_email = os.getenv('EMAIL')
-admin_pass = os.getenv('PASSWORD')
+admin_email = os.environ.get('EMAIL')
+admin_pass = os.environ.get('PASSWORD')
 
 pb_client = PocketBase(pb_url)
 admin_data = pb_client.admins.auth_with_password(admin_email , admin_pass)

@@ -32,6 +32,7 @@ from fastapi import FastAPI, status, Response, Request
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+import os
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -80,4 +81,14 @@ async def get_player_info_by_id(player_id: int, response: Response, request: Req
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return "Not a valid player ID"
+    
+@app.get("/playerName/{player_name}", status_code=status.HTTP_200_OK)
+@limiter.limit(limiter_amount)
+async def get_player_info_by_name(player_name: str, response: Response, request: Request):
+    try:
+        player_obj = GetPlayers.get_player_by_name(player_name)
+        return player_obj
+    except Exception as e:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return "Not a valid player name"
     

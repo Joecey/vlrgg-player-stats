@@ -85,7 +85,7 @@ def parse_player_name(ign : str):
     # doing this means request will be processed faster
     
     try:
-        record = pb_client.collection('players').get_first_list_item('ign="{}"'.format(ign))
+        record = pb_client.collection('players').get_first_list_item('ign="{}"'.format(ign.lower()))
         print('player in database')
         # print(record.ign)
         url_substring = record.url_end

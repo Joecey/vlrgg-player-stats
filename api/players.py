@@ -60,8 +60,6 @@ def check_if_exists(html, query):
 
 #TODO add top 5 recent matches > maybe use matches url
 #TODO add past teams
-#TODO add 3 most recent news articles on player?
-#TODO add total winnings
 
 def parse_player_id(html, id):
         new_player = Player(
@@ -96,6 +94,8 @@ def parse_player_name(ign : str):
         
 
     # get all players from stats page (this may take some time)
+    #TODO: run a cron job for getting players from the top 100 page - probably need to build up a separate instance on railway to run this properly 
+    #TODO: but for now, i think we can run this locally 
     except:
         print("player not found in local storage. adding to database - this may take some time...")
         # ! NOTE: This includes only players with more than 200 rounds played

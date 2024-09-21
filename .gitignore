@@ -2,6 +2,7 @@ __pycache__/
 .env
 testing/
 .space
+.venv
 Spacefile
 Discovery.md
 

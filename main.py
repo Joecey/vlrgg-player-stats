@@ -25,16 +25,19 @@ SOFTWARE.
 # main FastAPI app
 from api.players import GetPlayers
 from api.teams import GetTeams
-from fastapi import FastAPI, status, Response, Request
+from fastapi import FastAPI, status, Response, Request, Body, Depends
+from datetime import datetime
+from pydantic import BaseModel  # used for data validation 
+from typing import List, Annotated         # List used for creating list of classes 
 
-# Limit the amount of requests using slowapi so vercel doesn't blow up
-# also saw thi in axsddlr's solution, so i decided to use it too
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
-import os
+# database 
+from sqlalchemy.orm import Session
 
-limiter = Limiter(key_func=get_remote_address)
+from models import players
+from database import SessionLocal, engine
+
+# ! This works! In railway, the new table was created automatically!
+players.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="vlr.gg player API",
@@ -47,10 +50,18 @@ app = FastAPI(
     redoc_url=None,
 )
 
-# set limit rate for API
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-limiter_amount = "200/minute"
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+'''
+########## CHECK API HEALTH #######
+'''
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 def service_health():
@@ -61,19 +72,38 @@ Give option to search by player name or by player ID
 Also, async to allow for multipler users to use the api (i think that's how that works)
 """
 
-@app.get("/teamID/{team_id}", status_code=status.HTTP_200_OK)
-@limiter.limit(limiter_amount)
-async def get_team_info_by_id(team_id: int, response: Response, request: Request):
+
+'''
+########## RETRIEVING PLAYER INFORMATION #######
+'''
+
+# ? Player Schemas!!!!
+
+class AgentInfo(BaseModel):
+    agentName: str
+    usage: int
+
+class PlayerInfo(BaseModel):
+    playerIGN: str
+    playerId: int
+    country: str
+    agentList: List[AgentInfo]
+    lastUpdated: Annotated[datetime, Body()]
+
+
+@app.get("/players", status_code=status.HTTP_200_OK)
+def get_all_players(response: Response,skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     try:
-        player_obj = GetTeams.get_team_by_id(team_id)
-        return player_obj
+        # now attempt to query database (using the model defined in models folder)
+        # ? no need for async def in front for sqlalchemy
+        player_data = db.query(players.Player).offset(skip).limit(limit).all()
+        return {'data':player_data, 'msg': 'OK'}
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
-        return "Not a valid team ID"
-
+        return ("Issue with database", e)
+    
 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)
-@limiter.limit(limiter_amount)
 async def get_player_info_by_id(player_id: int, response: Response, request: Request):
     try:
         player_obj = GetPlayers.get_player_by_id(player_id)
@@ -83,7 +113,6 @@ async def get_player_info_by_id(player_id: int, response: Response, request: Req
         return "Not a valid player ID"
     
 @app.get("/playerName/{player_name}", status_code=status.HTTP_200_OK)
-@limiter.limit(limiter_amount)
 async def get_player_info_by_name(player_name: str, response: Response, request: Request):
     try:
         player_obj = GetPlayers.get_player_by_name(player_name)

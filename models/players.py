@@ -16,7 +16,7 @@ ORM Models used for database
 from sqlalchemy import Column, Integer, String, ARRAY, DateTime
 
 # call database.py file wiht Base
-from database import Base
+from database.database import Base
 
 class Player(Base):
     __tablename__ = "players"

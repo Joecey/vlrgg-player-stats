@@ -34,7 +34,7 @@ from typing import List, Annotated         # List used for creating list of clas
 from sqlalchemy.orm import Session
 
 from models import players
-from database import SessionLocal, engine
+from database.database import SessionLocal, engine
 
 # ! This works! In railway, the new table was created automatically!
 players.Base.metadata.create_all(bind=engine)

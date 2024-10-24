@@ -23,8 +23,8 @@ SOFTWARE.
 """
 
 # main FastAPI app
-from api.players import GetPlayers
-from api.teams import GetTeams
+from api.old_players import GetPlayers
+from api.old_teams import GetTeams
 from fastapi import FastAPI, status, Response, Request, Body, Depends
 from datetime import datetime
 from pydantic import BaseModel  # used for data validation 
@@ -103,6 +103,7 @@ def get_all_players(response: Response,skip: int = 0, limit: int = 100, db: Sess
         return ("Issue with database", e)
     
 
+# OLD CODE!!!!! 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)
 async def get_player_info_by_id(player_id: int, response: Response, request: Request):
     try:

@@ -36,14 +36,16 @@ from sqlalchemy.orm import Session
 from models import players
 from database.database import SessionLocal, engine
 
-# ! This works! In railway, the new table was created automatically!
+# ! This works! In railway, the new table was created automatically! 
+# TODO: bind additional tables to the engine as needed 
+# TODO: replace model updating with an actual migration package 
 players.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="vlr.gg player API",
     description="An Unofficial REST API for player information from [vlr.gg](https://www.vlr.gg/). "
     "Inspired by the other unofficial API by [axsddlr](https://github.com/axsddlr/vlrggapi) ",
-    version="1.0.0",
+    version="2.0.0",
     
     # set the docs url to be the root URL 
     docs_url='/',
@@ -103,7 +105,7 @@ def get_all_players(response: Response,skip: int = 0, limit: int = 100, db: Sess
         return ("Issue with database", e)
     
 
-# OLD CODE!!!!! 
+# ! OLD CODE!!!!! 
 @app.get("/playerID/{player_id}", status_code=status.HTTP_200_OK)
 async def get_player_info_by_id(player_id: int, response: Response, request: Request):
     try:

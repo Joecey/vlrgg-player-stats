@@ -5,3 +5,5 @@ Side project I am working on to learn more about FastAPI. This project allows us
 ## How to run 
 Run using uvicorn server in development mode
 `uvicorn main:app --host 0.0.0.0 --port 80 --reload`
+
+Run cron scripts from root using `python -m cron.players`

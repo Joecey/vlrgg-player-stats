@@ -20,10 +20,9 @@ from database.database import Base
 
 class Player(Base):
     __tablename__ = "players"
-    
-    id = Column(Integer, primary_key = True)
-    playerIGN = Column(String)
-    playerId = Column(Integer, unique=True)
+    id = Column(Integer, primary_key = True)    # this auto increments
+    playerIGN = Column(String) # TODO: we should allow this to be indexable
+    playerId = Column(Integer, unique=True) # TODO: we should allow this to be indexable
     country = Column(String)
     lastAgents = Column(ARRAY(String))
     lastAgentsUsageOrdered = Column(ARRAY(Integer))
